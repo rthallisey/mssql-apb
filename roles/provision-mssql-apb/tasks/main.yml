@@ -51,6 +51,17 @@
       DB_URI: 'Data Source={{ service_instance }},1433; Initial Catalog={{ mssql_db }}; Integrated Security=False; User Id=SA; Password={{ mssql_sa_pw }};'
   when: action == 'provision'
 
+- name: Create '{{ service_instance }}' route
+  openshift_v1_route:
+    name: '{{ service_instance }}'
+    namespace: '{{ namespace }}'
+    labels:
+      app: '{{ service_instance }}'
+      service: '{{ service_instance }}'
+    state: '{{ state }}'
+    to_name: '{{ service_instance }}'
+  register: mssql_service
+  when: cluster == "openshift"
 
 ##############################################################################
 ## A Kubernetes service serves as an internal load balancer.  It identifies a
@@ -72,7 +83,6 @@
         target_port: 1433
     state: '{{ state }}'
   register: mssql_service
-
 
 ##############################################################################
 ## An OpenShift Origin deployment configuration provides a replication
